@@ -62,11 +62,11 @@ func (moneyAccountRecordService *MoneyAccountRecordService) GetMoneyAccountRecor
 	// 创建db
 	db := global.GVA_DB.Model(&money.MoneyAccountRecord{})
 	// 如果有条件搜索 下方会自动创建搜索语句
-	if info.Type != nil {
-		db = db.Where("type = ?", info.Type)
+	if info.InOut != nil {
+		db = db.Where("in_out = ?", info.InOut)
 	}
-	if info.Category != nil {
-		db = db.Where("category = ?", info.Category)
+	if info.CategoryId != nil {
+		db = db.Where("category_id = ?", info.CategoryId)
 	}
 	if info.StartOccurTime != nil && info.EndOccurTime != nil {
 		db = db.Where("occur_time BETWEEN ? AND ? ", info.StartOccurTime, info.EndOccurTime)

@@ -9,12 +9,12 @@
         :rules="searchRule"
         @keyup.enter="onSubmit"
       >
-        <el-form-item label="类型" prop="type">
-          <el-input v-model.number="searchInfo.type" placeholder="搜索条件" />
+        <el-form-item label="类型" prop="inOut">
+          <el-input v-model.number="searchInfo.inOut" placeholder="搜索条件" />
         </el-form-item>
-        <el-form-item label="分类" prop="category">
+        <el-form-item label="分类" prop="categoryId">
           <el-input
-            v-model.number="searchInfo.category"
+            v-model.number="searchInfo.categoryId"
             placeholder="搜索条件"
           />
         </el-form-item>
@@ -96,13 +96,13 @@
         <el-table-column
           align="left"
           label="类型;1：收入（钱进） 2：支出（钱出）"
-          prop="type"
+          prop="inOut"
           width="120"
         />
         <el-table-column
           align="left"
           label="分类;1:存取款"
-          prop="category"
+          prop="categoryId"
           width="120"
         />
         <el-table-column align="left" label="发生时间" width="180">
@@ -159,14 +159,14 @@
       >
         <el-form-item label="类型;1：收入（钱进） 2：支出（钱出）:" prop="type">
           <el-input
-            v-model.number="formData.type"
+            v-model.number="formData.inOut"
             :clearable="true"
             placeholder="请输入"
           />
         </el-form-item>
-        <el-form-item label="分类;1:存取款:" prop="category">
+        <el-form-item label="分类;1:存取款:" prop="categoryId">
           <el-input
-            v-model.number="formData.category"
+            v-model.number="formData.categoryId"
             :clearable="true"
             placeholder="请输入"
           />
@@ -234,8 +234,8 @@ import { ref, reactive } from "vue";
 
 // 自动化生成的字典（可能为空）以及字段
 const formData = ref({
-  type: 0,
-  category: 0,
+  inOut: 0,
+  categoryId: 0,
   occurTime: new Date(),
   money: 0,
   remark: "",
@@ -243,14 +243,14 @@ const formData = ref({
 
 // 验证规则
 const rule = reactive({
-  type: [
+  inOut: [
     {
       required: true,
       message: "",
       trigger: ["input", "blur"],
     },
   ],
-  category: [
+  categoryId: [
     {
       required: true,
       message: "",
@@ -524,8 +524,8 @@ const openDialog = () => {
 const closeDialog = () => {
   dialogFormVisible.value = false;
   formData.value = {
-    type: 0,
-    category: 0,
+    inOut: 0,
+    categoryId: 0,
     occurTime: new Date(),
     money: 0,
     remark: "",
