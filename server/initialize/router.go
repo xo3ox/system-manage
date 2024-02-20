@@ -75,6 +75,8 @@ func Routers() *gin.Engine {
 	{
 		moneyRouter := router.RouterGroupApp.Money
 		moneyRouter.InitMoneyAccountRecordRouter(PrivateGroup)
+		moneyRouter.InitMoneyCategoryRouter(PrivateGroup)
+		moneyRouter.InitMoneyCompoundInterestRecordRouter(PrivateGroup)
 	}
 
 	global.GVA_LOG.Info("router register success")

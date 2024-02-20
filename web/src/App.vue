@@ -28,4 +28,7 @@ import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 .el-button{
   font-weight: 400 !important;
 }
+.el-form--inline .el-form-item {
+  margin-right: 24px;
+}
 </style>
