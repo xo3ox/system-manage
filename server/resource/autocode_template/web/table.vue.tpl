@@ -141,7 +141,7 @@
         {{- end }}
         <el-table-column align="left" label="操作">
             <template #default="scope">
-            <el-button type="primary" link icon="edit" class="table-button" @click="update{{.StructName}}Func(scope.row)">变更</el-button>
+            <el-button type="primary" link icon="edit" class="table-button" @click="update{{.StructName}}Func(scope.row)">修改</el-button>
             <el-button type="primary" link icon="delete" @click="deleteRow(scope.row)">删除</el-button>
             </template>
         </el-table-column>

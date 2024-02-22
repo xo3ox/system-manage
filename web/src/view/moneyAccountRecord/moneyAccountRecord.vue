@@ -120,7 +120,7 @@
               icon="edit"
               class="table-button"
               @click="updateMoneyAccountRecordFunc(scope.row)"
-              >变更</el-button
+              >修改</el-button
             >
             <el-button
               type="primary"

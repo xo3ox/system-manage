@@ -5,6 +5,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/money"
 	moneyReq "github.com/flipped-aurora/gin-vue-admin/server/model/money/request"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils/function"
 	"gorm.io/gorm"
 )
 
@@ -70,8 +71,18 @@ func (moneyCompoundInterestRecordService *MoneyCompoundInterestRecordService) Ge
 		db = db.Limit(info.PageSize).Offset((info.Page - 1) * info.PageSize)
 	}
 
-	if err = db.Order("id DESC").Find(&list).Limit(-1).Count(&total).Offset(-1).Error; err != nil {
+	if err = db.Order("expiration_time,principal_interest,id DESC").Find(&list).Limit(-1).Count(&total).Offset(-1).Error; err != nil {
 		return
 	}
+	return
+}
+
+// GetMoneyCompoundInterestRecordSummary 根据id获取MoneyCompoundInterestRecord累计概况记录
+func (moneyCompoundInterestRecordService *MoneyCompoundInterestRecordService) GetMoneyCompoundInterestRecordSummary(userId uint) (result money.MoneyCompoundInterestRecordSummary, err error) {
+	sql := `SELECT sum_principal,sum_interest FROM money_compound_interest_record_summary WHERE created_by = ?`
+	if err = global.GVA_DB.Raw(sql, userId).Scan(&result).Error; err != nil {
+		return
+	}
+	result.SumPrincipalInterest = function.Decimal(result.SumPrincipal + result.SumInterest)
 	return
 }

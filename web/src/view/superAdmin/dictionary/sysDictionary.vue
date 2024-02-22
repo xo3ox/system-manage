@@ -95,7 +95,7 @@
               type="primary"
               link
               @click="updateSysDictionaryFunc(scope.row)"
-            >变更</el-button>
+            >修改</el-button>
             <el-popover
               v-model="scope.row.visible"
               placement="top"

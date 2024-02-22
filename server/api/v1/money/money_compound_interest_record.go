@@ -8,6 +8,7 @@ import (
 	moneyReq "github.com/flipped-aurora/gin-vue-admin/server/model/money/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/service"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils/function"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -120,6 +121,10 @@ func (moneyCompoundInterestRecordApi *MoneyCompoundInterestRecordApi) UpdateMone
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
+	if moneyCompoundInterestRecord.PrincipalInterest != nil {
+		temp := function.Decimal(*moneyCompoundInterestRecord.PrincipalInterest - *moneyCompoundInterestRecord.Principal)
+		moneyCompoundInterestRecord.Interest = &temp
+	}
 	moneyCompoundInterestRecord.UpdatedBy = utils.GetUserID(c)
 	if err := moneyCompoundInterestRecordService.UpdateMoneyCompoundInterestRecord(moneyCompoundInterestRecord); err != nil {
 		global.GVA_LOG.Error("更新失败!", zap.Error(err))
@@ -180,5 +185,23 @@ func (moneyCompoundInterestRecordApi *MoneyCompoundInterestRecordApi) GetMoneyCo
 			Page:     info.Page,
 			PageSize: info.PageSize,
 		}, "获取成功", c)
+	}
+}
+
+// GetMoneyCompoundInterestRecordSummary 获取复利存款记录累计概况
+// @Tags MoneyCompoundInterestRecord
+// @Summary 累计概况
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Success 200 {object} response.Response{data=money.MoneyCompoundInterestRecordSummary} "返回结果"
+// @Router /moneyCompoundInterestRecord/getMoneyCompoundInterestRecordSummary [get]
+func (moneyCompoundInterestRecordApi *MoneyCompoundInterestRecordApi) GetMoneyCompoundInterestRecordSummary(c *gin.Context) {
+	userId := utils.GetUserID(c)
+	if result, err := moneyCompoundInterestRecordService.GetMoneyCompoundInterestRecordSummary(userId); err != nil {
+		global.GVA_LOG.Error("查询失败!", zap.Error(err))
+		response.FailWithDetailed(err.Error(), "查询失败", c)
+	} else {
+		response.OkWithData(gin.H{"result": result}, c)
 	}
 }

@@ -14,7 +14,7 @@
         <el-form-item label="利息:" prop="interest">
           <el-input-number v-model="formData.interest" :precision="2" :clearable="true"></el-input-number>
        </el-form-item>
-        <el-form-item label="本利和:" prop="principalInterest">
+        <el-form-item label="本息和:" prop="principalInterest">
           <el-input-number v-model="formData.principalInterest" :precision="2" :clearable="true"></el-input-number>
        </el-form-item>
         <el-form-item>
@@ -50,10 +50,10 @@ const router = useRouter()
 const type = ref('')
 const formData = ref({
             depositTime: new Date(),
-            expirationTime: new Date(),
-            principal: 0,
-            interest: 0,
-            principalInterest: 0,
+            expirationTime: null,
+            principal: null,
+            interest: null,
+            principalInterest: null,
         })
 // 验证规则
 const rule = reactive({

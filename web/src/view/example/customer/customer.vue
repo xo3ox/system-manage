@@ -23,7 +23,7 @@
         <el-table-column align="left" label="接入人ID" prop="sysUserId" width="120" />
         <el-table-column align="left" label="操作" min-width="160">
           <template #default="scope">
-            <el-button type="primary" link icon="edit" @click="updateCustomer(scope.row)">变更</el-button>
+            <el-button type="primary" link icon="edit" @click="updateCustomer(scope.row)">修改</el-button>
             <el-popover v-model="scope.row.visible" placement="top" width="160">
               <p>确定要删除吗？</p>
               <div style="text-align: right; margin-top: 8px;">

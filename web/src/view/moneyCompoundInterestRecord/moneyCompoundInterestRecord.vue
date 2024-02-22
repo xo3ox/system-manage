@@ -12,7 +12,8 @@
         <el-form-item label="存款时间" prop="depositTime">
           <div class="block">
             <el-date-picker
-              v-model="depositTime"
+              v-model="timeChoose"
+              @change="timeBetween"
               type="daterange"
               unlink-panels
               range-separator="-"
@@ -29,6 +30,18 @@
           >
           <el-button icon="refresh" @click="onReset">重置</el-button>
         </el-form-item>
+        <h4>
+          当前累计本金：<el-text class="mx-1" type="danger">{{
+            summaryList?.sumPrincipal
+          }}</el-text>
+          元，累计利息：<el-text class="mx-1" type="danger">{{
+            summaryList?.sumInterest
+          }}</el-text>
+          元，累计本息和：<el-text class="mx-1" type="danger">{{
+            summaryList?.sumPrincipalInterest
+          }}</el-text>
+          元
+        </h4>
       </el-form>
     </div>
     <div class="gva-table-box">
@@ -64,11 +77,6 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" />
-        <el-table-column align="left" label="日期" width="180">
-          <template #default="scope">{{
-            formatDate(scope.row.createdAt)
-          }}</template>
-        </el-table-column>
         <el-table-column align="left" label="存款时间" width="180">
           <template #default="scope">{{
             formatDate(scope.row.depositTime)
@@ -93,7 +101,7 @@
         />
         <el-table-column
           align="left"
-          label="本利和"
+          label="本息和"
           prop="principalInterest"
           width="120"
         />
@@ -105,7 +113,7 @@
               icon="edit"
               class="table-button"
               @click="updateMoneyCompoundInterestRecordFunc(scope.row)"
-              >变更</el-button
+              >修改</el-button
             >
             <el-button
               type="primary"
@@ -168,15 +176,15 @@
             :clearable="true"
           />
         </el-form-item>
-        <el-form-item label="利息:" prop="interest">
+        <!-- <el-form-item label="利息:" prop="interest">
           <el-input-number
             v-model="formData.interest"
             style="width: 100%"
             :precision="2"
             :clearable="true"
           />
-        </el-form-item>
-        <el-form-item label="本利和:" prop="principalInterest">
+        </el-form-item> -->
+        <el-form-item label="本息和:" prop="principalInterest">
           <el-input-number
             v-model="formData.principalInterest"
             style="width: 100%"
@@ -209,6 +217,7 @@ import {
   updateMoneyCompoundInterestRecord,
   findMoneyCompoundInterestRecord,
   getMoneyCompoundInterestRecordList,
+  getMoneyCompoundInterestRecordSummary,
 } from "@/api/moneyCompoundInterestRecord";
 
 // 全量引入格式化工具 请按需保留
@@ -224,10 +233,10 @@ import { ref, reactive } from "vue";
 // 自动化生成的字典（可能为空）以及字段
 const formData = ref({
   depositTime: new Date(),
-  expirationTime: new Date(),
-  principal: 0,
-  interest: 0,
-  principalInterest: 0,
+  expirationTime: null,
+  principal: null,
+  interest: null,
+  principalInterest: null,
 });
 
 // 验证规则
@@ -242,10 +251,13 @@ const rule = reactive({
 });
 
 const searchRule = reactive({
-  depositTime: [
+  timeChoose: [
     {
       validator: (rule, value, callback) => {
-        if (searchInfo.value.depositTime && !searchInfo.value.endDepositTime) {
+        if (
+          searchInfo.value.startDepositTime &&
+          !searchInfo.value.endDepositTime
+        ) {
           callback(new Error("请填写结束日期"));
         } else if (
           !searchInfo.value.startDepositTime &&
@@ -281,16 +293,16 @@ const tableData = ref([]);
 const searchInfo = ref({});
 
 // 存款时间
-const depositTime = ref('')
+const timeChoose = ref([]);
 const shortcuts = [
-{
+  {
     text: "本月",
-    value : () =>{
+    value: () => {
       const start = new Date();
       const end = new Date();
       start.setDate(1);
       return [start, end];
-    }
+    },
   },
   {
     text: "近六月",
@@ -328,10 +340,20 @@ const shortcuts = [
     },
   },
 ];
+// 存款时间选择
+const timeBetween = (timeChoose) => {
+  if (timeChoose != null) {
+    searchInfo.value.startDepositTime = timeChoose[0];
+    searchInfo.value.endDepositTime = timeChoose[1].Format(
+      "yyyy-MM-ddT15:59:59.999Z"
+    );
+  }
+};
 
 // 重置
 const onReset = () => {
   searchInfo.value = {};
+  timeChoose.value = []; // 存款时间置空
   getTableData();
 };
 
@@ -369,9 +391,19 @@ const getTableData = async () => {
     total.value = table.data.total;
     page.value = table.data.page;
     pageSize.value = table.data.pageSize;
+
+    getSummary();
   }
 };
 
+// 累计概况
+const summaryList = ref();
+const getSummary = async () => {
+  const table = await getMoneyCompoundInterestRecordSummary();
+  if (table.code === 0) {
+    summaryList.value = table.data.result;
+  }
+};
 getTableData();
 
 // ============== 表格控制部分结束 ===============
@@ -473,10 +505,10 @@ const closeDialog = () => {
   dialogFormVisible.value = false;
   formData.value = {
     depositTime: new Date(),
-    expirationTime: new Date(),
-    principal: 0,
-    interest: 0,
-    principalInterest: 0,
+    expirationTime: null,
+    principal: null,
+    interest: null,
+    principalInterest: null,
   };
 };
 // 弹窗确定

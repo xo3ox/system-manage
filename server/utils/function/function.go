@@ -182,3 +182,8 @@ func ParamsInterface(restFul, uri string, reqBody io.Reader, headers, params map
 
 	return nil
 }
+
+func Decimal(value float64) float64 {
+	v, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", value), 64)
+	return v
+}

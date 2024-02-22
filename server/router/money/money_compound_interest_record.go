@@ -1,7 +1,7 @@
 package money
 
 import (
-	"github.com/flipped-aurora/gin-vue-admin/server/api/v1"
+	v1 "github.com/flipped-aurora/gin-vue-admin/server/api/v1"
 	"github.com/flipped-aurora/gin-vue-admin/server/middleware"
 	"github.com/gin-gonic/gin"
 )
@@ -15,13 +15,14 @@ func (s *MoneyCompoundInterestRecordRouter) InitMoneyCompoundInterestRecordRoute
 	moneyCompoundInterestRecordRouterWithoutRecord := Router.Group("moneyCompoundInterestRecord")
 	var moneyCompoundInterestRecordApi = v1.ApiGroupApp.MoneyApiGroup.MoneyCompoundInterestRecordApi
 	{
-		moneyCompoundInterestRecordRouter.POST("createMoneyCompoundInterestRecord", moneyCompoundInterestRecordApi.CreateMoneyCompoundInterestRecord)   // 新建MoneyCompoundInterestRecord
-		moneyCompoundInterestRecordRouter.DELETE("deleteMoneyCompoundInterestRecord", moneyCompoundInterestRecordApi.DeleteMoneyCompoundInterestRecord) // 删除MoneyCompoundInterestRecord
+		moneyCompoundInterestRecordRouter.POST("createMoneyCompoundInterestRecord", moneyCompoundInterestRecordApi.CreateMoneyCompoundInterestRecord)             // 新建MoneyCompoundInterestRecord
+		moneyCompoundInterestRecordRouter.DELETE("deleteMoneyCompoundInterestRecord", moneyCompoundInterestRecordApi.DeleteMoneyCompoundInterestRecord)           // 删除MoneyCompoundInterestRecord
 		moneyCompoundInterestRecordRouter.DELETE("deleteMoneyCompoundInterestRecordByIds", moneyCompoundInterestRecordApi.DeleteMoneyCompoundInterestRecordByIds) // 批量删除MoneyCompoundInterestRecord
-		moneyCompoundInterestRecordRouter.PUT("updateMoneyCompoundInterestRecord", moneyCompoundInterestRecordApi.UpdateMoneyCompoundInterestRecord)    // 更新MoneyCompoundInterestRecord
+		moneyCompoundInterestRecordRouter.PUT("updateMoneyCompoundInterestRecord", moneyCompoundInterestRecordApi.UpdateMoneyCompoundInterestRecord)              // 更新MoneyCompoundInterestRecord
 	}
 	{
-		moneyCompoundInterestRecordRouterWithoutRecord.GET("findMoneyCompoundInterestRecord", moneyCompoundInterestRecordApi.FindMoneyCompoundInterestRecord)        // 根据ID获取MoneyCompoundInterestRecord
-		moneyCompoundInterestRecordRouterWithoutRecord.GET("getMoneyCompoundInterestRecordList", moneyCompoundInterestRecordApi.GetMoneyCompoundInterestRecordList)  // 获取MoneyCompoundInterestRecord列表
+		moneyCompoundInterestRecordRouterWithoutRecord.GET("findMoneyCompoundInterestRecord", moneyCompoundInterestRecordApi.FindMoneyCompoundInterestRecord)             // 根据ID获取MoneyCompoundInterestRecord
+		moneyCompoundInterestRecordRouterWithoutRecord.GET("getMoneyCompoundInterestRecordList", moneyCompoundInterestRecordApi.GetMoneyCompoundInterestRecordList)       // 获取MoneyCompoundInterestRecord列表
+		moneyCompoundInterestRecordRouterWithoutRecord.GET("getMoneyCompoundInterestRecordSummary", moneyCompoundInterestRecordApi.GetMoneyCompoundInterestRecordSummary) // 获取复利存款记录累计概况
 	}
 }

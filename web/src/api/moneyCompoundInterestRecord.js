@@ -95,3 +95,11 @@ export const getMoneyCompoundInterestRecordList = (params) => {
     params
   })
 }
+
+export const getMoneyCompoundInterestRecordSummary = (params) => {
+  return service({
+    url: '/moneyCompoundInterestRecord/getMoneyCompoundInterestRecordSummary',
+    method: 'get',
+    params
+  })
+}
