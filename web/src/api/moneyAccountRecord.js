@@ -95,3 +95,12 @@ export const getMoneyAccountRecordList = (params) => {
     params
   })
 }
+// @Tags getMoneyAccountRecordSummary
+// @Summary 账目管理概括
+export const getMoneyAccountRecordSummary = (params) => {
+  return service({
+    url: '/moneyAccountRecord/getMoneyAccountRecordSummary',
+    method: 'get',
+    params
+  })
+}

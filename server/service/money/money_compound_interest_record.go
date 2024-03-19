@@ -79,7 +79,7 @@ func (moneyCompoundInterestRecordService *MoneyCompoundInterestRecordService) Ge
 
 // GetMoneyCompoundInterestRecordSummary 根据id获取MoneyCompoundInterestRecord累计概况记录
 func (moneyCompoundInterestRecordService *MoneyCompoundInterestRecordService) GetMoneyCompoundInterestRecordSummary(userId uint) (result money.MoneyCompoundInterestRecordSummary, err error) {
-	sql := `SELECT sum_principal,sum_interest FROM money_compound_interest_record_summary WHERE created_by = ?`
+	sql := `SELECT sum_principal,sum_interest FROM v_money_compound_interest_record_summary WHERE created_by = ?`
 	if err = global.GVA_DB.Raw(sql, userId).Scan(&result).Error; err != nil {
 		return
 	}

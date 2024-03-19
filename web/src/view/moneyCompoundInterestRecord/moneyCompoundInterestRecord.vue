@@ -20,7 +20,6 @@
               start-placeholder="开始日期"
               end-placeholder="结束日期"
               :shortcuts="shortcuts"
-              :size="size"
             />
           </div>
         </el-form-item>
@@ -148,7 +147,7 @@
         label-position="right"
         ref="elFormRef"
         :rules="rule"
-        label-width="80px"
+        label-width="100px"
       >
         <el-form-item label="存款时间:" prop="depositTime">
           <el-date-picker
@@ -248,6 +247,13 @@ const rule = reactive({
       trigger: ["input", "blur"],
     },
   ],
+  depositTime: [
+    {
+      required: true,
+      message: "",
+      trigger: ["input", "blur"],
+    },
+  ],
 });
 
 const searchRule = reactive({
@@ -292,7 +298,7 @@ const pageSize = ref(10);
 const tableData = ref([]);
 const searchInfo = ref({});
 
-// 存款时间
+// 时间选择
 const timeChoose = ref([]);
 const shortcuts = [
   {

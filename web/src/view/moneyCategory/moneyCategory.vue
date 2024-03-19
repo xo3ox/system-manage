@@ -51,7 +51,7 @@
               icon="edit"
               class="table-button"
               @click="updateMoneyCategoryFunc(scope.row)"
-              >修改</el-button
+              >编辑</el-button
             >
             <el-button
               type="primary"
@@ -78,7 +78,7 @@
     <el-dialog
       v-model="dialogFormVisible"
       :before-close="closeDialog"
-      :title="type === 'create' ? '添加' : '修改'"
+      :title="type === 'create' ? '添加' : '编辑'"
       destroy-on-close
     >
       <el-form

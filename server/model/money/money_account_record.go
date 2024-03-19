@@ -21,3 +21,9 @@ type MoneyAccountRecord struct {
 func (MoneyAccountRecord) TableName() string {
 	return "money_account_record"
 }
+
+type MoneyAccountRecordSummary struct {
+	SumIn      float64 `json:"sumIn"`               // 累计本金：当前用户存款时间最近十二个月的本金
+	SumOut     float64 `json:"sumOut"`              // 累计利息：当前用户所有记录产生的利息
+	SumBalance float64 `json:"sumBalance" gorm:"-"` // 累计本息和：当前用户  累计本金+累计利息
+}

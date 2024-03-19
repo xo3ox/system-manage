@@ -15,6 +15,7 @@ type MoneyCategoryService struct {
 // Author [piexlmax](https://github.com/piexlmax)
 func (moneyCategoryService *MoneyCategoryService) CreateMoneyCategory(moneyCategory *money.MoneyCategory) (err error) {
 	err = global.GVA_DB.Transaction(func(tx *gorm.DB) error {
+		// 不存在则创建
 		if err = tx.Create(moneyCategory).Error; err != nil {
 			return err
 		}

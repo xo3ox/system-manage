@@ -96,6 +96,8 @@ export const getMoneyCompoundInterestRecordList = (params) => {
   })
 }
 
+// @Tags getMoneyCompoundInterestRecordSummary
+// @Summary 复利存款记录概括
 export const getMoneyCompoundInterestRecordSummary = (params) => {
   return service({
     url: '/moneyCompoundInterestRecord/getMoneyCompoundInterestRecordSummary',

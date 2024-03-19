@@ -5,6 +5,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/money"
 	moneyReq "github.com/flipped-aurora/gin-vue-admin/server/model/money/request"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils/function"
 	"gorm.io/gorm"
 )
 
@@ -60,7 +61,7 @@ func (moneyAccountRecordService *MoneyAccountRecordService) GetMoneyAccountRecor
 func (moneyAccountRecordService *MoneyAccountRecordService) GetMoneyAccountRecordInfoList(info moneyReq.MoneyAccountRecordSearch) (list []*money.MoneyAccountRecord, total int64, err error) {
 
 	// 创建db
-	db := global.GVA_DB.Model(&money.MoneyAccountRecord{})
+	db := global.GVA_DB.Model(&money.MoneyAccountRecord{}).Where("created_by = ?", info.CreatedBy)
 	// 如果有条件搜索 下方会自动创建搜索语句
 	if info.InOut != nil {
 		db = db.Where("in_out = ?", info.InOut)
@@ -82,5 +83,19 @@ func (moneyAccountRecordService *MoneyAccountRecordService) GetMoneyAccountRecor
 	if err = db.Order("id DESC").Find(&list).Limit(-1).Count(&total).Offset(-1).Error; err != nil {
 		return
 	}
+	return
+}
+
+// GetMoneyAccountRecordSummary 根据id获取概况
+func (moneyAccountRecordService *MoneyAccountRecordService) GetMoneyAccountRecordSummary(userId uint) (result money.MoneyAccountRecordSummary, err error) {
+	sql := `SELECT
+	ROUND(SUM(IF(in_out = 1, money, 0)), 2) AS sum_in,
+	ROUND(SUM(IF(in_out = 2, money, 0)), 2) AS sum_out
+	FROM money_account_record
+	WHERE deleted_at IS NULL AND created_by = ?`
+	if err = global.GVA_DB.Raw(sql, userId).Scan(&result).Error; err != nil {
+		return
+	}
+	result.SumBalance = function.Decimal(result.SumIn - result.SumOut)
 	return
 }

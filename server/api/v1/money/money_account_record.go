@@ -176,6 +176,7 @@ func (moneyAccountRecordApi *MoneyAccountRecordApi) GetMoneyAccountRecordList(c 
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
+	info.CreatedBy = utils.GetUserID(c)
 	if list, total, err := moneyAccountRecordService.GetMoneyAccountRecordInfoList(info); err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithDetailed(err.Error(), "获取失败", c)
@@ -186,5 +187,23 @@ func (moneyAccountRecordApi *MoneyAccountRecordApi) GetMoneyAccountRecordList(c 
 			Page:     info.Page,
 			PageSize: info.PageSize,
 		}, "获取成功", c)
+	}
+}
+
+// getMoneyAccountRecordSummary 获取复利存款记录累计概况
+// @Tags MoneyCompoundInterestRecord
+// @Summary 累计概况
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Success 200 {object} response.Response{data=money.MoneyCompoundInterestRecordSummary} "返回结果"
+// @Router /moneyCompoundInterestRecord/getMoneyAccountRecordSummary [get]
+func (moneyAccountRecordApi *MoneyAccountRecordApi) GetMoneyAccountRecordSummary(c *gin.Context) {
+	userId := utils.GetUserID(c)
+	if result, err := moneyAccountRecordService.GetMoneyAccountRecordSummary(userId); err != nil {
+		global.GVA_LOG.Error("查询失败!", zap.Error(err))
+		response.FailWithDetailed(err.Error(), "查询失败", c)
+	} else {
+		response.OkWithData(gin.H{"result": result}, c)
 	}
 }

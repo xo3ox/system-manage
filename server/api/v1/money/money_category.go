@@ -35,6 +35,12 @@ func (moneyCategoryApi *MoneyCategoryApi) CreateMoneyCategory(c *gin.Context) {
 	}
 
 	moneyCategory.CreatedBy = utils.GetUserID(c)
+
+	if getHas(moneyCategory) {
+		response.FailWithMessage("该分类已存在", c)
+		return
+	}
+
 	if err := moneyCategoryService.CreateMoneyCategory(&moneyCategory); err != nil {
 		global.GVA_LOG.Error("创建失败!", zap.Error(err))
 		response.FailWithDetailed(err.Error(), "创建失败", c)
@@ -108,11 +114,40 @@ func (moneyCategoryApi *MoneyCategoryApi) UpdateMoneyCategory(c *gin.Context) {
 		return
 	}
 	moneyCategory.UpdatedBy = utils.GetUserID(c)
+
+	if getHas(moneyCategory) {
+		response.FailWithMessage("该分类已存在", c)
+		return
+	}
+
 	if err := moneyCategoryService.UpdateMoneyCategory(moneyCategory); err != nil {
 		global.GVA_LOG.Error("更新失败!", zap.Error(err))
 		response.FailWithDetailed(err.Error(), "更新失败", c)
 	} else {
 		response.OkWithMessage("更新成功", c)
+	}
+}
+
+func getHas(temp money.MoneyCategory) (has bool) {
+	var args []any
+	// 查询当前用户该分类是否已经存在
+	sql := `SELECT COUNT(1) FROM money_category WHERE tag = ? AND created_by = ? `
+	args = append(args, temp.Tag)
+	if temp.ID == 0 {
+		args = append(args, temp.CreatedBy)
+	} else {
+		args = append(args, temp.UpdatedBy)
+		sql += ` AND id != ?`
+		args = append(args, temp.ID)
+	}
+	if err := global.GVA_DB.Raw(sql, args...).Scan(&has).Error; err != nil {
+		return
+	}
+
+	if has {
+		return true
+	} else {
+		return false
 	}
 }
 

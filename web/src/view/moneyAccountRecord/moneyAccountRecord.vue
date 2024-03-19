@@ -10,42 +10,60 @@
         @keyup.enter="onSubmit"
       >
         <el-form-item label="类型" prop="inOut">
-          <el-input v-model.number="searchInfo.inOut" placeholder="搜索条件" />
+          <el-select
+            v-model.number="searchInfo.inOut"
+            clearable
+            @clear="searchInfo.inOut = undefined"
+            placeholder="请选择类型"
+            style="width: 180px"
+          >
+            <el-option
+              v-for="item in inOutEnum"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
         </el-form-item>
-        <el-form-item label="分类" prop="categoryId">
-          <el-input
+        <el-form-item label="账目分类" prop="categoryId">
+          <el-select
             v-model.number="searchInfo.categoryId"
-            placeholder="搜索条件"
-          />
+            clearable
+            @clear="searchInfo.categoryId = undefined"
+            placeholder="请选择账目分类"
+            style="width: 180px"
+          >
+            <el-option
+              v-for="item in moneyCategoryEnum"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
         </el-form-item>
 
         <el-form-item label="发生时间" prop="occurTime">
           <div class="block">
-            <span class="demonstration">
-              <el-tooltip
-                content="搜索范围是开始日期（包含）至结束日期（包含）"
-              >
-              </el-tooltip>
-            </span>
             <el-date-picker
-              v-model="value2"
+              v-model="timeChoose"
+              @change="timeBetween"
               type="monthrange"
               unlink-panels
-              range-separator="To"
+              range-separator="-"
               start-placeholder="开始年月"
               end-placeholder="结束年月"
               :shortcuts="shortcuts"
             />
           </div>
-          <!-- <el-date-picker v-model="searchInfo.startOccurTime" type="datetime" placeholder="开始日期"
-            :disabled-date="time => searchInfo.endOccurTime ? time.getTime() > searchInfo.endOccurTime.getTime() : false"></el-date-picker>
-          —
-          <el-date-picker v-model="searchInfo.endOccurTime" type="datetime" placeholder="结束日期"
-            :disabled-date="time => searchInfo.startOccurTime ? time.getTime() < searchInfo.startOccurTime.getTime() : false"></el-date-picker> -->
         </el-form-item>
 
         <el-form-item label="备注" prop="remark">
-          <el-input v-model="searchInfo.remark" placeholder="搜索条件" />
+          <el-input
+            v-model="searchInfo.remark"
+            clearable
+            placeholder="请输入关键字"
+            style="width: 180px"
+          />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" icon="search" @click="onSubmit"
@@ -53,6 +71,18 @@
           >
           <el-button icon="refresh" @click="onReset">重置</el-button>
         </el-form-item>
+        <h4>
+          当前收入：<el-text class="mx-1" type="danger">{{
+            summaryList?.sumIn
+          }}</el-text>
+          元，累计支出：<el-text class="mx-1" type="danger">{{
+            summaryList?.sumOut
+          }}</el-text>
+          元，累计余额：<el-text class="mx-1" type="danger">{{
+            summaryList?.sumBalance
+          }}</el-text>
+          元
+        </h4>
       </el-form>
     </div>
     <div class="gva-table-box">
@@ -88,30 +118,29 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" />
-        <el-table-column align="left" label="日期" width="180">
-          <template #default="scope">{{
-            formatDate(scope.row.createdAt)
-          }}</template>
+
+        <el-table-column align="left" label="类型" prop="inOut" width="120">
+          <template v-slot="scoped">
+            {{ filterDict(scoped.row.inOut, inOutEnum) }}
+          </template>
         </el-table-column>
         <el-table-column
           align="left"
-          label="类型;1：收入（钱进） 2：支出（钱出）"
-          prop="inOut"
-          width="120"
-        />
-        <el-table-column
-          align="left"
-          label="分类;1:存取款"
+          label="账目分类"
           prop="categoryId"
           width="120"
-        />
+        >
+          <template v-slot="scoped">
+            {{ filterDict(scoped.row.categoryId, moneyCategoryEnum) }}
+          </template></el-table-column
+        >
         <el-table-column align="left" label="发生时间" width="180">
           <template #default="scope">{{
             formatDate(scope.row.occurTime)
           }}</template>
         </el-table-column>
-        <el-table-column align="left" label="金额" prop="money" width="120" />
-        <el-table-column align="left" label="备注" prop="remark" width="120" />
+        <el-table-column align="left" label="金额(元)" prop="money" width="150" />
+        <el-table-column align="left" label="备注" prop="remark" width="150" />
         <el-table-column align="left" label="操作">
           <template #default="scope">
             <el-button
@@ -120,7 +149,7 @@
               icon="edit"
               class="table-button"
               @click="updateMoneyAccountRecordFunc(scope.row)"
-              >修改</el-button
+              >编辑</el-button
             >
             <el-button
               type="primary"
@@ -147,7 +176,7 @@
     <el-dialog
       v-model="dialogFormVisible"
       :before-close="closeDialog"
-      :title="type === 'create' ? '添加' : '修改'"
+      :title="type === 'create' ? '添加' : '编辑'"
       destroy-on-close
     >
       <el-form
@@ -155,34 +184,53 @@
         label-position="right"
         ref="elFormRef"
         :rules="rule"
-        label-width="80px"
+        label-width="100px"
       >
-        <el-form-item label="类型;1：收入（钱进） 2：支出（钱出）:" prop="type">
-          <el-input
+        <el-form-item label="类型:" prop="inOut">
+          <el-select
             v-model.number="formData.inOut"
-            :clearable="true"
-            placeholder="请输入"
-          />
+            clearable
+            @clear="formData.inOut = undefined"
+            placeholder="请选择类型"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="item in inOutEnum"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
         </el-form-item>
-        <el-form-item label="分类;1:存取款:" prop="categoryId">
-          <el-input
+        <el-form-item label="账目分类:" prop="categoryId">
+          <el-select
             v-model.number="formData.categoryId"
-            :clearable="true"
-            placeholder="请输入"
-          />
+            clearable
+            @clear="formData.categoryId = undefined"
+            placeholder="请选择账目分类"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="item in moneyCategoryEnum"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="发生时间:" prop="occurTime">
           <el-date-picker
             v-model="formData.occurTime"
             type="date"
             style="width: 100%"
-            placeholder="选择日期"
+            placeholder="请选择日期"
             :clearable="true"
           />
         </el-form-item>
-        <el-form-item label="金额:" prop="money">
+        <el-form-item label="金额(元):" prop="money">
           <el-input-number
             v-model="formData.money"
+            placeholder="请输入金额"
             style="width: 100%"
             :precision="2"
             :clearable="true"
@@ -220,7 +268,10 @@ import {
   updateMoneyAccountRecord,
   findMoneyAccountRecord,
   getMoneyAccountRecordList,
+  getMoneyAccountRecordSummary
 } from "@/api/moneyAccountRecord";
+
+import { getMoneyCategoryList } from "@/api/moneyCategory";
 
 // 全量引入格式化工具 请按需保留
 import {
@@ -232,13 +283,41 @@ import {
 import { ElMessage, ElMessageBox } from "element-plus";
 import { ref, reactive } from "vue";
 
+// 账目分类列表
+const moneyCategoryEnum = ref([]);
+
+// 获取账目分类列表
+const getCategoryList = () => {
+  getMoneyCategoryList().then((res) => {
+    moneyCategoryEnum.value = res.data.list.map((item) => {
+      return {
+        value: item.id,
+        label: item.tag,
+      };
+    });
+  });
+};
+getCategoryList();
+
+// 钱进钱出枚举
+const inOutEnum = ref([
+  {
+    label: "收入",
+    value: 1,
+  },
+  {
+    label: "支出",
+    value: 2,
+  },
+]);
+
 // 自动化生成的字典（可能为空）以及字段
 const formData = ref({
-  inOut: 0,
-  categoryId: 0,
+  // inOut: 0,
+  // categoryId: 0,
   occurTime: new Date(),
-  money: 0,
-  remark: "",
+  // money: 0,
+  // remark: "",
 });
 
 // 验证规则
@@ -274,33 +353,7 @@ const rule = reactive({
 });
 
 const searchRule = reactive({
-  createdAt: [
-    {
-      validator: (rule, value, callback) => {
-        if (searchInfo.value.startCreatedAt && !searchInfo.value.endCreatedAt) {
-          callback(new Error("请填写结束日期"));
-        } else if (
-          !searchInfo.value.startCreatedAt &&
-          searchInfo.value.endCreatedAt
-        ) {
-          callback(new Error("请填写开始日期"));
-        } else if (
-          searchInfo.value.startCreatedAt &&
-          searchInfo.value.endCreatedAt &&
-          (searchInfo.value.startCreatedAt.getTime() ===
-            searchInfo.value.endCreatedAt.getTime() ||
-            searchInfo.value.startCreatedAt.getTime() >
-              searchInfo.value.endCreatedAt.getTime())
-        ) {
-          callback(new Error("开始日期应当早于结束日期"));
-        } else {
-          callback();
-        }
-      },
-      trigger: "change",
-    },
-  ],
-  occurTime: [
+  timeChoose: [
     {
       validator: (rule, value, callback) => {
         if (searchInfo.value.startOccurTime && !searchInfo.value.endOccurTime) {
@@ -338,17 +391,23 @@ const pageSize = ref(10);
 const tableData = ref([]);
 const searchInfo = ref({});
 
-// 发生时间
+// 时间选择
+const timeChoose = ref([]);
 const shortcuts = [
   {
     text: "本月",
-    value: [new Date(), new Date()],
+    value: () => {
+      const start = new Date();
+      const end = new Date();
+      start.setDate(1);
+      return [start, end];
+    },
   },
   {
     text: "近六月",
     value: () => {
-      const end = new Date();
       const start = new Date();
+      const end = new Date();
       start.setMonth(start.getMonth() - 6);
       return [start, end];
     },
@@ -356,34 +415,44 @@ const shortcuts = [
   {
     text: "今年",
     value: () => {
-      const end = new Date();
       const start = new Date(new Date().getFullYear(), 0);
+      const end = new Date();
       return [start, end];
     },
   },
   {
     text: "近一年",
     value: () => {
-      const end = new Date();
       const start = new Date();
-      start.setMonth(start.getMonth() - 6);
+      const end = new Date();
+      start.setFullYear(start.getFullYear() - 1);
       return [start, end];
     },
   },
   {
     text: "近三年",
     value: () => {
-      const end = new Date();
       const start = new Date();
-      start.setMonth(start.getMonth() - 6);
+      const end = new Date();
+      start.setFullYear(start.getFullYear() - 3);
       return [start, end];
     },
   },
 ];
+// 发生时间选择
+const timeBetween = (timeChoose) => {
+  if (timeChoose != null) {
+    searchInfo.value.startOccurTime = timeChoose[0];
+    searchInfo.value.endOccurTime = timeChoose[1].Format(
+      "yyyy-MM-ddT15:59:59.999Z"
+    );
+  }
+};
 
 // 重置
 const onReset = () => {
   searchInfo.value = {};
+  timeChoose.value = []; // 发生时间置空
   getTableData();
 };
 
@@ -422,8 +491,16 @@ const getTableData = async () => {
     page.value = table.data.page;
     pageSize.value = table.data.pageSize;
   }
+  getSummary();
 };
-
+// 累计概况
+const summaryList = ref();
+const getSummary = async () => {
+  const table = await getMoneyAccountRecordSummary();
+  if (table.code === 0) {
+    summaryList.value = table.data.result;
+  }
+};
 getTableData();
 
 // ============== 表格控制部分结束 ===============
@@ -524,11 +601,11 @@ const openDialog = () => {
 const closeDialog = () => {
   dialogFormVisible.value = false;
   formData.value = {
-    inOut: 0,
-    categoryId: 0,
+    // inOut: 0,
+    // categoryId: 0,
     occurTime: new Date(),
-    money: 0,
-    remark: "",
+    // money: 0,
+    // remark: "",
   };
 };
 // 弹窗确定
